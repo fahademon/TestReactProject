@@ -7,7 +7,7 @@ const api = axios.create({
   baseURL: 'https://api.thecatapi.com/v1',
   headers: {
     'Content-Type': 'application/json',
-    'x-api-key': "live_vvCvW3wDXf3EDaJIIWvN9GgNChn6UoHUlHIJX5AG8ru5qhgEK8X3XVOeItRH49oV"//import.meta.env.VITE_CAT_API_KEY
+    'x-api-key': import.meta.env.VITE_CAT_API_KEY
   },
 });
 
