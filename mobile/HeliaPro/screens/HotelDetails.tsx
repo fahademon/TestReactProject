@@ -13,21 +13,24 @@ import ReviewCard from '../components/ReviewCard';
 import Button from '../components/Button';
 import RBSheet from "react-native-raw-bottom-sheet";
 import SocialIcon from '../components/SocialIcon';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { NavigationProp, useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import type { RootStackParamList } from '../navigations/types';
 import LinearGradient from 'react-native-linear-gradient';
+import { Breed, CatImage } from "@common/types/cat.types";
+
+type Props = RouteProp<RootStackParamList, 'BreedDetails'>;
 
 const HotelDetails = () => {
     const navigation = useNavigation<NavigationProp<any>>();
     const { dark } = useTheme();
     const refRBSheet = useRef<any>(null);
+    const route = useRoute<Props>();
+    const {breed} = route.params;
+    console.log(breed)
 
     // Slider images
     const sliderImages = [
-        images.hotel1,
-        images.hotel2,
-        images.hotel3,
-        images.hotel4,
-        images.hotel5,
+        {uri : breed?.image? breed?.image.url : undefined}
     ];
 
     const renderHeader = () => {
@@ -69,10 +72,10 @@ const HotelDetails = () => {
     /**
     * render content
     */
-    const renderContent = () => {
+    const renderContent = (breed: Breed) => {
         const [expanded, setExpanded] = useState(false);
 
-        const description = `Cozy one-bedroom apartment with lots of natural light. Open layout with a spacious living room perfect for relaxing or entertaining. Modern kitchen equipped with all essentials. Quiet neighborhood with nearby parks and cafes. Ideal for individuals or couples looking for comfort and convenience.`
+        const description = breed.description;
 
         const toggleExpanded = () => {
             setExpanded(!expanded);
@@ -82,99 +85,55 @@ const HotelDetails = () => {
             <View style={styles.contentContainer}>
                 <Text style={[styles.estateName, {
                     color: dark ? COLORS.secondaryWhite : COLORS.black,
-                }]}>Modernica Apartment</Text>
-                <View style={styles.ratingContainer}>
+                }]}>{breed?.name}</Text>
+                {breed["alt_names"] && <View style={styles.ratingContainer}>
                     <View style={styles.categoryContainer}>
-                        <Text style={styles.categoryName}>Apartment</Text>
+                        <Text style={styles.categoryName}>Also known as: {breed["alt_names"]}</Text>
                     </View>
-                    <View style={styles.numReviewContainer}>
-                        <FontAwesome name="star" size={16} color="orange" />
-                        <Text style={[styles.rating, {
-                            color: dark ? COLORS.secondaryWhite : COLORS.black
-                        }]}>{"  "}4.8 (1,275 reviews)</Text>
-                    </View>
-                </View>
+                </View>}
 
                 <View style={styles.viewContainer}>
                     <View style={styles.viewItemContainer}>
                         <View style={styles.viewItemIcon}>
                             <Image
-                                source={icons.bed as ImageSourcePropType}
+                                source={icons.box2 as ImageSourcePropType}
                                 resizeMode="contain"
                                 style={styles.viewIcon}
                             />
                         </View>
                         <Text style={[styles.viewTitle, {
                             color: dark ? COLORS.tertiaryWhite : COLORS.black
-                        }]}>8 Beds</Text>
+                        }]}>{breed.weight.metric} kgs</Text>
                     </View>
                     <View style={styles.viewItemContainer}>
                         <View style={styles.viewItemIcon}>
                             <Image
-                                source={icons.bathtub as ImageSourcePropType}
+                                source={icons.health as ImageSourcePropType}
                                 resizeMode="contain"
                                 style={styles.viewIcon}
                             />
                         </View>
                         <Text style={[styles.viewTitle, {
                             color: dark ? COLORS.tertiaryWhite : COLORS.black
-                        }]}>3 Bath</Text>
+                        }]}>{breed.life_span} years</Text>
                     </View>
                     <View style={styles.viewItemContainer}>
                         <View style={styles.viewItemIcon}>
                             <Image
-                                source={icons.bathtub as ImageSourcePropType}
+                                source={icons.world as ImageSourcePropType}
                                 resizeMode="contain"
                                 style={styles.viewIcon}
                             />
                         </View>
                         <Text style={[styles.viewTitle, {
                             color: dark ? COLORS.tertiaryWhite : COLORS.black
-                        }]}>2000 sqft</Text>
+                        }]}>{breed.origin}</Text>
                     </View>
                 </View>
                 <View style={[styles.separateLine, {
                     backgroundColor: dark ? COLORS.greyScale800 : COLORS.grayscale200,
                 }]} />
 
-                <View style={styles.userInfoContainer}>
-                    <View style={styles.userInfoLeftContainer}>
-                        <TouchableOpacity>
-                            <Image
-                                source={images.user3}
-                                resizeMode="cover"
-                                style={styles.userImage}
-                            />
-                        </TouchableOpacity>
-                        <View style={{ marginLeft: 12 }}>
-                            <Text style={[styles.userName, {
-                                color: dark ? COLORS.secondaryWhite : COLORS.black
-                            }]}>Natasya Wilodra</Text>
-                            <Text style={[styles.userPosition, {
-                                color: dark ? COLORS.grayscale400 : COLORS.grayscale700,
-                            }]}>Owner</Text>
-                        </View>
-                    </View>
-                    <View style={styles.userInfoRightContainer}>
-                        <TouchableOpacity
-                            onPress={() => navigation.navigate("chat")}>
-                            <Image
-                                source={icons.chatBubble2Outline as ImageSourcePropType}
-                                resizeMode="contain"
-                                style={styles.chatIcon}
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => navigation.navigate("call")}
-                            style={{ marginLeft: 12 }}>
-                            <Image
-                                source={icons.telephoneOutline as ImageSourcePropType}
-                                resizeMode='contain'
-                                style={styles.phoneIcon}
-                            />
-                        </TouchableOpacity>
-                    </View>
-                </View>
 
                 <Text style={[styles.viewSubtitle, {
                     color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
@@ -188,138 +147,9 @@ const HotelDetails = () => {
                     </Text>
                 </TouchableOpacity>
 
-                <Text style={[styles.viewSubtitle, {
-                    color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
-                }]}>Facilities</Text>
-                <FlatList
-                    data={hotelFacilties}
-                    keyExtractor={(item, index) => index.toString()}
-                    horizontal={false}
-                    numColumns={4} // Render two items per row
-                    renderItem={({ item, index }) => (
-                        <Facility
-                            name={item.name}
-                            icon={item.icon}
-                            iconColor={item.iconColor}
-                            backgroundColor={item.backgroundColor}
-                        />
-                    )}
-                />
-                <View style={styles.subItemContainer}>
-                    <Text style={[styles.viewSubtitle, {
-                        color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
-                    }]}>Gallery</Text>
-                    <TouchableOpacity onPress={() => navigation.navigate("gallery")}>
-                        <Text style={styles.seeAll}>See All</Text>
-                    </TouchableOpacity>
-                </View>
 
-                <View style={styles.coverImageContainer}>
-                    <Image
-                        source={images.hotel1}
-                        resizeMode='cover'
-                        style={styles.coverImage}
-                    />
-                    <Image
-                        source={images.hotel2}
-                        resizeMode='cover'
-                        style={styles.coverImage}
-                    />
-                    <ImageBackground
-                        imageStyle={{ borderRadius: 16 }}
-                        style={styles.coverImage}
-                        source={images.hotel4}>
-                        <LinearGradient
-                            colors={['rgba(0,0,0,0.8)', 'transparent']}
-                            style={styles.gradientImage}>
-                            <Text style={styles.numImage}>20+</Text>
-                        </LinearGradient>
-                    </ImageBackground>
-                </View>
 
-                <Text style={[styles.viewSubtitle, {
-                    color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
-                }]}>Location</Text>
 
-                <View style={styles.estateItemContainer}>
-                    <Image
-                        source={icons.pin}
-                        resizeMode='contain'
-                        style={styles.locationIcon}
-                    />
-                    <Text style={[styles.locationText, {
-                        color: dark ? COLORS.grayscale400 : COLORS.grayscale700,
-                    }]}>6993 Meadow Valley Terrace, New York</Text>
-                </View>
-
-                <View style={[styles.locationMapContainer, {
-                    backgroundColor: dark ? COLORS.dark1 : COLORS.white,
-                }]}>
-                    <MapView
-                        style={styles.mapContainer}
-                        customMapStyle={dark ? mapDarkStyle : mapStandardStyle}
-                        userInterfaceStyle="dark"
-                        initialRegion={{
-                            latitude: 48.8566,
-                            longitude: 2.3522,
-                            latitudeDelta: 0.0922,
-                            longitudeDelta: 0.0421,
-                        }}>
-                        <Marker
-                            coordinate={{
-                                latitude: 48.8566,
-                                longitude: 2.3522,
-                            }}
-                            image={icons.map}
-                            title="Move"
-                            description="Address"
-                            onPress={() => console.log("Move to another screen")}
-                        >
-                            <Callout tooltip>
-                                <View>
-                                    <View style={styles.bubble}>
-                                        <Text
-                                            style={{
-                                                ...FONTS.body4,
-                                                fontWeight: 'bold',
-                                                color: COLORS.black,
-                                            }}
-                                        >
-                                            User Address
-                                        </Text>
-                                    </View>
-                                    <View style={styles.arrowBorder} />
-                                    <View style={styles.arrow} />
-                                </View>
-                            </Callout>
-                        </Marker>
-                    </MapView>
-                </View>
-
-                <View style={styles.reviewContainer}>
-                    <View style={styles.reviewLeft}>
-                        <Image
-                            source={icons.star as ImageSourcePropType}
-                            resizeMode='contain'
-                            style={styles.starMiddleIcon}
-                        />
-                        <Text style={[styles.reviewTitle, {
-                            color: dark ? COLORS.white : COLORS.greyscale900
-                        }]}>4.8 (3.279 reviews)</Text>
-                    </View>
-                    <TouchableOpacity onPress={() => navigation.navigate("hotelreviews")}>
-                        <Text style={styles.seeAll}>See All</Text>
-                    </TouchableOpacity>
-                </View>
-
-                <ReviewCard
-                    avatar={images.user1}
-                    name="Maria Thompson"
-                    description="The location of this apartment is exceptional! The neighborhood is very friendly and convenient. Highly recommended! 😍"
-                    avgRating={5}
-                    date="2024-01-23T04:52:06.501Z"
-                    numLikes={948}
-                />
             </View>
         )
     }
@@ -327,32 +157,23 @@ const HotelDetails = () => {
     return (
         <View style={[styles.area,
         { backgroundColor: dark ? COLORS.dark1 : COLORS.white }]}>
-            <StatusBar hidden />
+            <StatusBar  />
             <AutoSlider images={sliderImages} />
             {renderHeader()}
             <ScrollView showsVerticalScrollIndicator={false}>
-                {renderContent()}
+                {renderContent(breed)}
             </ScrollView>
             <View style={[styles.bookBottomContainer, {
                 backgroundColor: dark ? COLORS.dark1 : COLORS.white,
                 borderTopColor: dark ? COLORS.dark1 : COLORS.white,
             }]}>
-                <View style={styles.priceContainer}>
-                    <Text style={[styles.priceText, {
-                        color: dark ? COLORS.grayscale400 : COLORS.grayscale700,
-                    }]}>Price</Text>
-                    <View style={styles.priceDurationContainer}>
-                        <Text style={styles.price}>$29{" "}</Text>
-                        <Text style={[styles.priceDuration, {
-                            color: dark ? COLORS.grayscale400 : COLORS.grayscale700,
-                        }]}>/ night</Text>
-                    </View>
-                </View>
                 <Button
-                    title="Booking Now"
+                    title="Adopt"
                     filled
                     style={styles.bookingBtn}
-                    onPress={() => navigation.navigate("booking")}
+                    onPress={() => navigation.navigate("booking", {
+                        breed: breed
+                    })}
                 />
             </View>
 
@@ -483,7 +304,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 3,
         borderRadius: 6,
-        width: 80,
+        width: "auto",
     },
     categoryName: {
         fontSize: 12,
@@ -512,11 +333,11 @@ const styles = StyleSheet.create({
     viewItemContainer: {
         flexDirection: "row",
         alignItems: "center",
-        marginRight: 12
+        marginRight: 8
     },
     viewItemIcon: {
-        width: 44,
-        height: 44,
+        width: 40,
+        height: 40,
         backgroundColor: COLORS.tansparentPrimary,
         alignItems: "center",
         justifyContent: "center",
@@ -531,7 +352,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontFamily: "Urbanist Medium",
         color: COLORS.black,
-        marginLeft: 12
+        marginLeft: 0
     },
     separateLine: {
         width: SIZES.width - 32,
@@ -725,7 +546,7 @@ const styles = StyleSheet.create({
         right: 0,
         width: SIZES.width,
         flexDirection: "row",
-        justifyContent: "space-between",
+        justifyContent: "center",
         alignItems: "center",
         height: 104,
         backgroundColor: COLORS.white,

@@ -1,18 +1,43 @@
 // Import Dependencies
-import PropTypes from "prop-types";
+import React from "react";
 import { forwardRef } from "react";
 import { clsx } from "clsx";
 
 // Local Imports
-import { useId } from "hooks";
+import { useId } from "../../../hooks";
 import { InputErrorMsg } from "./InputErrorMsg";
 
-// ----------------------------------------------------------------------
+/**
+ * @typedef {Object} InputProps
+ * @property {React.ElementType} [component] - The component to render (e.g. "input").
+ * @property {React.ReactNode} [label] - Label text or element.
+ * @property {string} [value] - Controlled value.
+ * @property {(e: React.ChangeEvent<HTMLInputElement>) => void} [onChange] - Change handler.
+ * @property {React.ReactNode} [prefix] - Element before input.
+ * @property {React.ReactNode} [suffix] - Element after input.
+ * @property {string} [description] - Optional description below input.
+ * @property {string} [className] - Additional classes for input element.
+ * @property {Object} [classNames] - Classes for sub-elements.
+ * @property {boolean|React.ReactNode} [error] - Error state or message.
+ * @property {boolean} [unstyled] - If true, disables default styles.
+ * @property {boolean} [disabled] - Disables input.
+ * @property {string} [type] - HTML input type.
+ * @property {Object} [rootProps] - Props spread to container.
+ * @property {Object} [labelProps] - Props spread to label.
+ * @property {string} [id] - Custom id for input.
+ */
 
+/**
+ * @type {React.ForwardRefExoticComponent<
+ *   React.PropsWithoutRef<InputProps> & React.RefAttributes<HTMLInputElement>
+ * >}
+ */
 const Input = forwardRef((props, ref) => {
   const {
     component,
     label,
+    value,
+    onChange,
     prefix,
     suffix,
     description,
@@ -60,6 +85,12 @@ const Input = forwardRef((props, ref) => {
         )}
       >
         <Component
+          id={inputId}
+          ref={ref}
+          type={type}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
           className={clsx(
             "form-input-base",
             suffix && "ltr:pr-9 rtl:pl-9",
@@ -77,12 +108,9 @@ const Input = forwardRef((props, ref) => {
             className,
             classNames?.input,
           )}
-          type={type}
-          id={inputId}
-          ref={ref}
-          disabled={disabled}
           {...rest}
         />
+
         {prefix && (
           <div
             className={clsx(
@@ -106,6 +134,7 @@ const Input = forwardRef((props, ref) => {
           </div>
         )}
       </div>
+
       <InputErrorMsg
         when={error && typeof error !== "boolean"}
         className={classNames?.error}
@@ -127,22 +156,5 @@ const Input = forwardRef((props, ref) => {
 });
 
 Input.displayName = "Input";
-
-Input.propTypes = {
-  component: PropTypes.elementType,
-  label: PropTypes.node,
-  prefix: PropTypes.node,
-  suffix: PropTypes.node,
-  description: PropTypes.string,
-  className: PropTypes.string,
-  classNames: PropTypes.object,
-  error: PropTypes.oneOfType([PropTypes.bool, PropTypes.node]),
-  unstyled: PropTypes.bool,
-  disabled: PropTypes.bool,
-  type: PropTypes.string,
-  rootProps: PropTypes.object,
-  labelProps: PropTypes.object,
-  id: PropTypes.string,
-};
 
 export { Input };

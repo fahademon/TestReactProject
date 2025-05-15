@@ -1,4 +1,4 @@
-import { HomeIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, ListBulletIcon } from '@heroicons/react/24/outline';
 import DashboardsIcon from 'assets/dualicons/dashboards.svg?react'
 import { NAV_TYPE_ROOT, NAV_TYPE_ITEM } from 'constants/app.constant'
 
@@ -22,6 +22,14 @@ export const dashboards = {
             transKey: 'nav.dashboards.home',
             Icon: HomeIcon,
         },
+        {
+            id: 'dashboards.adoptions', // Unique identifier
+            path: 'dashboards/adoptions', // Route path
+            type: NAV_TYPE_ITEM, // Item type (NAV_TYPE_ITEM, NAV_TYPE_ROOT, or NAV_TYPE_COLLAPSE)
+            title: 'Adoptions', // Title
+            transKey: 'Adoptions', // Translation key (optional)
+            Icon: ListBulletIcon, // Icon component (optional)
+        }
 
     ]
 }

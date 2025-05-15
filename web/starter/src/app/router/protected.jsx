@@ -5,6 +5,7 @@ import { Navigate } from "react-router";
 import { AppLayout } from "app/layouts/AppLayout";
 import { DynamicLayout } from "app/layouts/DynamicLayout";
 import AuthGuard from "middleware/AuthGuard";
+import Adoptions from "../pages/dashboards/home/"
 
 // ----------------------------------------------------------------------
 
@@ -31,6 +32,12 @@ const protectedRoutes = {
               path: "home",
               lazy: async () => ({
                 Component: (await import("app/pages/dashboards/home")).default,
+              }),
+            },
+            {
+              path: "adoptions",
+              lazy: async () => ({
+                Component: (await import("app/pages/dashboards/adoptions")).default,
               }),
             },
           ],

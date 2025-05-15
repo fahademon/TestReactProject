@@ -1,0 +1,26 @@
+{
+    "extends": "../../tsconfig.json", 
+    "compilerOptions": {
+        /*"baseUrl": ".",
+        "paths": {
+            "utils/*": ["src/utils/*"],
+            "constants/*": ["src/constants/*"],
+            "hooks/*": ["src/hooks/*"],
+            "ui/*": ["src/ui/*"],
+            "middleware/*": ["src/middleware/*"]
+        },*/
+        "allowJs": true,
+        "checkJs": true,            
+        "jsx": "react",   
+        "noEmit": true   , 
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,   
+        "lib": [
+            "ES2015",   // brings in Promise, Map, etc.
+            "DOM",       // for window, document, fetch, etc.
+            "ES2015.Promise"
+        ]
+    },
+    "include": ["src/**/*.ts", "src/**/*.tsx"],
+}
+  

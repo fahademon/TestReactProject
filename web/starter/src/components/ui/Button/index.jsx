@@ -2,10 +2,27 @@
 import PropTypes from "prop-types";
 import { forwardRef } from "react";
 import clsx from 'clsx'
+import React from "react";
 
 // Local Imports
-import { COLORS } from "constants/app.constant";
-import { setThisClass } from "utils/setThisClass";
+import { COLORS } from "../../../constants/app.constant";
+import { setThisClass } from "../../../utils/setThisClass";
+/**
+ * @typedef {Object} ButtonProps
+ * @property {React.ReactNode} [children]
+ * @property {React.ElementType} [component]
+ * @property {string} [className]
+ * @property {string} [type]
+ * @property {boolean} [isIcon]
+ * @property {boolean} [disabled]
+ * @property {(e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void} [onClick]
+ * @property {string} [color]
+ * @property {"filled" | "outlined" | "soft" | "flat"} [variant]
+ * @property {boolean} [unstyled]
+ * @property {boolean} [isGlow]
+ * @property {any} [ref]
+ */
+
 
 // ----------------------------------------------------------------------
 
@@ -26,7 +43,7 @@ const neutralVariants = {
     "border border-gray-300 hover:bg-gray-300/20 focus:bg-gray-300/20 text-gray-900 active:bg-gray-300/25 dark:text-dark-50 dark:hover:bg-dark-300/20 dark:focus:bg-dark-300/20 dark:active:bg-dark-300/25 dark:border-dark-450",
   flat: "hover:bg-gray-300/20 focus:bg-gray-300/20 text-gray-700 active:bg-gray-300/25 dark:text-dark-200 dark:hover:bg-dark-300/10 dark:focus:bg-dark-300/10 dark:active:bg-dark-300/20",
 };
-
+/** @type {import('react').ForwardRefExoticComponent<ButtonProps>} */
 const Button = forwardRef((props, ref) => {
   const {
     component,

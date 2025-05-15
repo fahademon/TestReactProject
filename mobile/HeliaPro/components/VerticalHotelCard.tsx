@@ -3,21 +3,20 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, ImageSourcePropType } 
 import { COLORS, SIZES, icons } from '../constants';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import { useTheme } from '../theme/ThemeProvider';
+import { Breed, CatImage } from "@common/types/cat.types"
 
 // Define the props type for the component
-interface VerticalHotelCardProps {
+interface CatCardProps {
   name: string;
-  image: ImageSourcePropType;
-  rating: number;
-  price: number;
+  image: CatImage;
+  price: string;
   location: string;
   onPress: () => void;
 }
 
-const VerticalHotelCard: React.FC<VerticalHotelCardProps> = ({
+const VerticalHotelCard: React.FC<CatCardProps> = ({
   name,
   image,
-  rating,
   price,
   location,
   onPress
@@ -32,15 +31,11 @@ const VerticalHotelCard: React.FC<VerticalHotelCardProps> = ({
         backgroundColor: dark ? COLORS.dark2 : COLORS.white
       }]}
     >
-      <Image
-        source={image}
+      {image && <Image
+        source={image?.url ? { uri: image.url } : undefined}
         resizeMode='cover'
         style={styles.image}
-      />
-      <View style={styles.reviewContainer}>
-        <FontAwesome name="star" size={12} color="orange" />
-        <Text style={styles.rating}>{rating}</Text>
-      </View>
+      />}
       <Text style={[styles.name, {
         color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
       }]}>
@@ -51,12 +46,9 @@ const VerticalHotelCard: React.FC<VerticalHotelCardProps> = ({
       }]}>
         {location}
       </Text>
-      <View style={styles.bottomPriceContainer}>
+      {0 && <View style={styles.bottomPriceContainer}>
         <View style={styles.priceContainer}>
-          <Text style={styles.price}>${price}</Text>
-          <Text style={[styles.durationText, {
-            color: dark ? COLORS.greyscale300 : COLORS.grayscale700,
-          }]}> / night</Text>
+          <Text style={styles.price}>{price}</Text>
         </View>
         <TouchableOpacity onPress={() => setIsFavourite(!isFavourite)}>
           <Image
@@ -65,7 +57,7 @@ const VerticalHotelCard: React.FC<VerticalHotelCardProps> = ({
             style={styles.heartIcon}
           />
         </TouchableOpacity>
-      </View>
+      </View>}
     </TouchableOpacity>
   );
 };
@@ -75,26 +67,30 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     width: (SIZES.width - 32) / 2 - 12,
     backgroundColor: COLORS.white,
-    padding: 6,
+    padding: 4,
     borderRadius: 16,
     marginBottom: 12
   },
   image: {
-    width: "100%",
-    height: 140,
-    borderRadius: 16
+    width: "95%",
+    height: 130,
+    borderRadius: 16,
+    marginLeft: 4,
+    marginTop: 4
   },
   name: {
     fontSize: 16,
     fontFamily: "Urbanist Bold",
     color: COLORS.greyscale900,
-    marginVertical: 4
+    marginVertical: 4,
+    marginHorizontal:4
   },
   location: {
     fontSize: 12,
     fontFamily: "Urbanist Regular",
     color: COLORS.grayscale700,
-    marginVertical: 4
+    marginVertical: 4,
+    marginHorizontal: 4
   },
   bottomPriceContainer: {
     width: "100%",

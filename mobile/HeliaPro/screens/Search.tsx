@@ -13,6 +13,8 @@ import VerticalHotelCard from '../components/VerticalHotelCard';
 import HorizontalHotelCard from '../components/HorizontalHotelCard';
 import NotFoundCard from '../components/NotFoundCard';
 import Button from '../components/Button';
+import useCatStore from '@common/store/useCatStore';
+import  { Breed, CatImage } from "@common/types/cat.types";
 
 interface CustomSliderHandleProps {
   enabled: boolean;
@@ -64,6 +66,13 @@ const Search: React.FC<SearchProps> = () => {
   const [selectedRating, setSelectedRating] = useState<string[]>(["1"]);
   const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100]); // Initial price range
+  const fetchBreeds = useCatStore(state => state.fetchBreeds);
+  const breeds = useCatStore(state => state.breeds);
+  const loading = useCatStore(state => state.loading);
+
+  useEffect(() => {
+    fetchBreeds();
+  }, [fetchBreeds]);
 
   const handleSliderChange = (values: number[]) => {
     if (values.length === 2) {
@@ -112,20 +121,28 @@ const Search: React.FC<SearchProps> = () => {
   const renderContent = () => {
     const [selectedTab, setSelectedTab] = useState('row');
     const [searchQuery, setSearchQuery] = useState('');
-    const [filteredHotels, setFilteredHotels] = useState(allHotels);
-    const [resultsCount, setResultsCount] = useState(0);
-
+    const [resultsCount, setResultsCount] = useState(-1);
+    const [filtered, setFiltered] = useState<Breed[]>([]);
+    
     useEffect(() => {
       handleSearch();
+      console.log(resultsCount)
     }, [searchQuery, selectedTab]);
 
-
     const handleSearch = () => {
-      const hotels = allHotels.filter((hotel) =>
-        hotel.name.toLowerCase().includes(searchQuery.toLowerCase())
+      const term = searchQuery.toLowerCase();
+      setFiltered(
+        breeds.filter(b => 
+          b.name.toLowerCase().includes(term) ||
+          b.temperament.toLowerCase().includes(term) || 
+          b.origin?.toLowerCase().includes(term) ||
+          b.description?.toLowerCase().includes(term) ||
+          b["alt_names"]?.toLowerCase().includes(term)
+        )
       );
-      setFilteredHotels(hotels);
-      setResultsCount(hotels.length);
+      
+      searchQuery? setResultsCount(filtered.length): setResultsCount(-1);
+      console.log(filtered)
     };
 
     return (
@@ -162,38 +179,39 @@ const Search: React.FC<SearchProps> = () => {
           </TouchableOpacity>
         </View>
 
-
-        <View style={styles.reusltTabContainer}>
-          <Text style={[styles.tabText, {
-            color: dark ? COLORS.secondaryWhite : COLORS.black
-          }]}>{resultsCount} founds</Text>
-          <View style={styles.viewDashboard}>
-            <TouchableOpacity
-              onPress={() => {
-                setSelectedTab('column');
-                setSearchQuery(''); // Clear search query when changing tab
-              }}>
-              <Image
-                source={selectedTab === 'column' ? icons.document2 as ImageSourcePropType : icons.document2Outline as ImageSourcePropType}
-                resizeMode='contain'
-                style={styles.dashboardIcon}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                setSelectedTab('row');
-                setSearchQuery(''); // Clear search query when changing tab
-              }}>
-              <Image
-                source={selectedTab === 'row' ? icons.dashboard as ImageSourcePropType : icons.dashboardOutline as ImageSourcePropType}
-                resizeMode='contain'
-                style={styles.dashboardIcon}
-              />
-            </TouchableOpacity>
+          <View style={styles.reusltTabContainer}>
+            <View style={styles.viewDashboard}>
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedTab('column');
+                  setSearchQuery(''); // Clear search query when changing tab
+                }}>
+                <Image
+                  source={selectedTab === 'column' ? icons.document2 as ImageSourcePropType : icons.document2Outline as ImageSourcePropType}
+                  resizeMode='contain'
+                  style={styles.dashboardIcon}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedTab('row');
+                  setSearchQuery(''); // Clear search query when changing tab
+                }}>
+                <Image
+                  source={selectedTab === 'row' ? icons.dashboard as ImageSourcePropType : icons.dashboardOutline as ImageSourcePropType}
+                  resizeMode='contain'
+                  style={styles.dashboardIcon}
+                />
+              </TouchableOpacity>
+            </View>
+            {searchQuery && resultsCount != -1 && <Text style={[styles.tabText, {
+              color: dark ? COLORS.secondaryWhite : COLORS.black
+            }]}>{resultsCount} found</Text>}
           </View>
-        </View>
-
+        
         {/* Results container  */}
+                { loading ? <View>Loading...</View>:
+
         <View>
           {/* hotels result list */}
           <ScrollView
@@ -202,12 +220,12 @@ const Search: React.FC<SearchProps> = () => {
               backgroundColor: dark ? COLORS.dark1 : COLORS.secondaryWhite,
               marginVertical: 16
             }}>
-            {resultsCount && resultsCount > 0 ? (
+            {(resultsCount && (resultsCount != 0)) ? (
               <>
                 {
                   selectedTab === 'row' ? (
                     <FlatList
-                      data={filteredHotels}
+                      data={searchQuery? filtered : breeds}
                       keyExtractor={(item) => item.id}
                       numColumns={2}
                       columnWrapperStyle={{ gap: 16 }}
@@ -216,17 +234,18 @@ const Search: React.FC<SearchProps> = () => {
                           <VerticalHotelCard
                             name={item.name}
                             image={item.image}
-                            rating={item.rating}
-                            price={item.price}
-                            location={item.location}
-                            onPress={() => navigation.navigate("hoteldetails")}
+                            price={item.origin}
+                            location={item.temperament}
+                            onPress={() => navigation.navigate("hoteldetails",{
+                                              breed: item
+                                            })}
                           />
                         )
                       }}
                     />
                   ) : (
                     <FlatList
-                      data={filteredHotels}
+                      data={filtered}
                       keyExtractor={(item) => item.id}
                       renderItem={({ item }) => {
                         return (
@@ -236,7 +255,9 @@ const Search: React.FC<SearchProps> = () => {
                             rating={item.rating}
                             price={item.price}
                             location={item.location}
-                            onPress={() => navigation.navigate("hoteldetails")}
+                            onPress={() => navigation.navigate("hoteldetails",{
+                                              breed: item
+                                            })}
                           />
                         );
                       }}
@@ -249,6 +270,7 @@ const Search: React.FC<SearchProps> = () => {
             )}
           </ScrollView>
         </View>
+      }
       </View>
     )
   }
@@ -525,7 +547,8 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontFamily: "Urbanist Regular",
-    marginHorizontal: 8
+    marginHorizontal: 8,
+    height:40
   },
   filterIcon: {
     width: 24,

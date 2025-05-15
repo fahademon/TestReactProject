@@ -1,5 +1,5 @@
 import axios, { InternalAxiosRequestConfig } from 'axios';
-import { refreshToken as refreshTokenService } from '../services/example.service';
+import { refreshToken as refreshTokenService } from '../services/catAPI';
 
 // Set config defaults when creating the instance
 export const axiosObject = axios.create();

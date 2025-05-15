@@ -28,7 +28,7 @@ const BottomTabNavigation = () => {
         >
             <Tab.Screen
                 name="Home"
-                component={Home}
+                component={Search}
                 options={{
                     title: "",
                     tabBarIcon: ({ focused }: { focused: boolean }) => {
@@ -57,37 +57,7 @@ const BottomTabNavigation = () => {
                 }}
             />
             <Tab.Screen
-                name="Search"
-                component={Search}
-                options={{
-                    title: "",
-                    tabBarIcon: ({ focused }: { focused: boolean }) => {
-                        return (
-                            <View style={{
-                                alignItems: "center",
-                                paddingTop: 16,
-                                width: SIZES.width / 5
-                            }}>
-                                <Image
-                                    source={focused ? icons.explore as ImageSourcePropType : icons.exploreOutline as ImageSourcePropType}
-                                    resizeMode="contain"
-                                    style={{
-                                        width: 24,
-                                        height: 24,
-                                        tintColor: focused ? COLORS.primary : dark ? COLORS.gray3 : COLORS.gray3,
-                                    }}
-                                />
-                                <Text style={{
-                                    ...FONTS.body4,
-                                    color: focused ? COLORS.primary : dark ? COLORS.gray3 : COLORS.gray3,
-                                }}>Search</Text>
-                            </View>
-                        )
-                    },
-                }}
-            />
-            <Tab.Screen
-                name="Bookings"
+                name="Adoptions"
                 component={Bookings}
                 options={{
                     title: "",
@@ -110,37 +80,7 @@ const BottomTabNavigation = () => {
                                 <Text style={{
                                     ...FONTS.body4,
                                     color: focused ? COLORS.primary : dark ? COLORS.gray3 : COLORS.gray3,
-                                }}>Bookings</Text>
-                            </View>
-                        )
-                    },
-                }}
-            />
-            <Tab.Screen
-                name="Wallet"
-                component={Wallet}
-                options={{
-                    title: "",
-                    tabBarIcon: ({ focused }: { focused: boolean }) => {
-                        return (
-                            <View style={{
-                                alignItems: "center",
-                                paddingTop: 16,
-                                width: SIZES.width / 5
-                            }}>
-                                <Image
-                                    source={focused ? icons.wallet2 as ImageSourcePropType : icons.wallet2Outline as ImageSourcePropType}
-                                    resizeMode="contain"
-                                    style={{
-                                        width: 24,
-                                        height: 24,
-                                        tintColor: focused ? COLORS.primary : dark ? COLORS.gray3 : COLORS.gray3,
-                                    }}
-                                />
-                                <Text style={{
-                                    ...FONTS.body4,
-                                    color: focused ? COLORS.primary : dark ? COLORS.gray3 : COLORS.gray3,
-                                }}>Tickets</Text>
+                                }}>Adoptions</Text>
                             </View>
                         )
                     },

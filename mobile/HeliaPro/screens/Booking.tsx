@@ -7,183 +7,76 @@ import { Calendar, DateData } from 'react-native-calendars';
 import { ScrollView } from 'react-native-virtualized-view';
 import Button from '../components/Button';
 import { useTheme } from '../theme/ThemeProvider';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { NavigationProp, useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import type { RootStackParamList } from '../navigations/types';
 import { MarkedDates } from 'react-native-calendars/src/types';
+import { Breed, CatImage, AdoptionRecord } from "@common/types/cat.types";
+import useCatStore from '@common/store/useCatStore';
 
-interface SelectedRange {
-    startDate: string;
-    endDate: string;
-  }
+type Props = RouteProp<RootStackParamList, 'BreedDetails'>;
 
 // select booking dates
 const Booking = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const { colors, dark } = useTheme();
-  const [selectedRange, setSelectedRange] = useState<SelectedRange>({
-    startDate: '',
-    endDate: ''
-  });
+  const [petName, setPetName] = useState("");
+  const [adopterName, setAdopterName] = useState("");
 
-  const onDayPress = (day: DateData) => {
-    if (!selectedRange.startDate || (selectedRange.startDate && selectedRange.endDate)) {
-      setSelectedRange({
-        startDate: day.dateString,
-        endDate: ''
-      });
-    } else {
-      setSelectedRange((prevState) => ({
-        ...prevState,
-        endDate: day.dateString
-      }));
-    }
-  };
+  
+  const route = useRoute<Props>();
+  const {breed} = route.params;
 
-  const renderSelectedDates = () => {
-    if (selectedRange.startDate && selectedRange.endDate) {
-      return (
-        <Text style={styles.selectedDatesText}>
-          Check-in: {selectedRange.startDate} - Check-out: {selectedRange.endDate}
-        </Text>
-      );
-    } else if (selectedRange.startDate) {
-      return (
-        <Text style={styles.selectedDatesText}>
-          Check-in: {selectedRange.startDate}
-        </Text>
-      );
-    }
-    return null;
-  };
+  const adopt = useCatStore((s) => s.adoptNow);
+  const [adopted, setAdopted] = useState(false);
 
-    const getMarkedDates = (): MarkedDates => {
-    const markedDates: MarkedDates = {};
-
-    if (selectedRange.startDate) {
-      markedDates[selectedRange.startDate] = {
-        startingDay: true,
-        color: COLORS.white,
-        textColor: COLORS.primary
-      };
-    }
-
-    if (selectedRange.endDate) {
-      markedDates[selectedRange.endDate] = {
-        endingDay: true,
-        color: COLORS.white,
-        textColor: COLORS.primary
-      };
-
-      // Mark all dates between startDate and endDate
-      let start = new Date(selectedRange.startDate);
-      let end = new Date(selectedRange.endDate);
-      let current = new Date(start);
-
-      while (current < end) {
-        current.setDate(current.getDate() + 1);
-        const dateStr = current.toISOString().split('T')[0];
-        if (dateStr !== selectedRange.endDate) {
-          markedDates[dateStr] = {
-            color: COLORS.white,
-            textColor: COLORS.primary
-        };
-      }
-    }
+  function handleAdoption() {
+    adopt({
+      adopterName: adopterName,
+      breed: breed,
+      name: petName,
+      adoptionDate: new Date().toISOString(),
+    });
+    setAdopted(true);
+    navigation.goBack();
   }
-
-  return markedDates;
-};
-
 
   return (
     <SafeAreaView style={[styles.area, { backgroundColor: colors.background }]}>
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <Header title="Booking" />
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <Header title="Adopt" />
           <Text style={[styles.title, {
             color: dark ? COLORS.secondaryWhite : COLORS.black
-          }]}>Select Date</Text>
-          <View>
-          <Calendar
-              onDayPress={onDayPress}
-              markingType={'period'}
-              markedDates={getMarkedDates()}
-              style={{
-                backgroundColor: COLORS.primary,
-                marginVertical: 16,
-                borderRadius: 12,
-                height: 370
-              }}
-              theme={{
-                backgroundColor: COLORS.primary,
-                calendarBackground: COLORS.primary,
-                textSectionTitleColor: COLORS.white,
-                selectedDayBackgroundColor: COLORS.white,
-                selectedDayTextColor: COLORS.primary,
-                todayTextColor: COLORS.white,
-                dayTextColor: COLORS.white,
-                textDisabledColor: '#ffffff',
-                monthTextColor: COLORS.white,
-                indicatorColor: COLORS.white,
-                textDayFontWeight: '300',
-                textMonthFontWeight: 'bold',
-                textDayHeaderFontWeight: '300',
-                textDayFontSize: 12,
-                arrowColor: COLORS.white
-
-              }}
-            />
-          </View>
-          <View style={styles.selectedDateContainer}>
-            <View style={styles.selectedDateLeftContainer}>
-              <Text style={[styles.selectedDateTitle, {
-                color: dark ? COLORS.secondaryWhite : COLORS.black
-              }]}>Check In</Text>
-              <View style={[styles.dateContainer, {
-                backgroundColor: dark ? COLORS.dark2 : COLORS.tertiaryWhite,
-              }]}>
-                <Text style={styles.dateText}>{selectedRange.startDate}</Text>
-                <Image
-                  source={icons.calendar4 as ImageSourcePropType}
-                  resizeMode='contain'
-                  style={styles.calendarIcon}
-                />
-              </View>
-            </View>
-            <View style={styles.selectedDateLeftContainer}>
-              <Text style={[styles.selectedDateTitle, {
-                color: dark ? COLORS.secondaryWhite : COLORS.black
-              }]}>Check out</Text>
-              <View style={[styles.dateContainer, {
-                backgroundColor: dark ? COLORS.dark2 : COLORS.tertiaryWhite,
-              }]}>
-                <Text style={styles.dateText}>{selectedRange.endDate}</Text>
-                <Image
-                  source={icons.calendar4 as ImageSourcePropType}
-                  resizeMode='contain'
-                  style={styles.calendarIcon}
-                />
-              </View>
-            </View>
-          </View>
-
-          <Text style={[styles.title, {
-            color: dark ? COLORS.secondaryWhite : COLORS.black
-          }]}>Note to Owner (optional)</Text>
+          }]}>Adopter's Name</Text>
           <TextInput
-            placeholder='Notes'
+            placeholder='e.g John Smith'
             placeholderTextColor={COLORS.grayscale700}
             style={[styles.noteInput, {
               backgroundColor: dark ? COLORS.dark2 : COLORS.tertiaryWhite,
               color: dark ? COLORS.secondaryWhite : COLORS.black
             }]}
-            multiline={true}
+            value={adopterName}
+            onChangeText={(text) => {
+              setAdopterName(text);
+            }}
           />
-        </ScrollView>
+          <Text style={[styles.title, {
+            color: dark ? COLORS.secondaryWhite : COLORS.black
+          }]}>Cat's Name</Text>
+          <TextInput
+            placeholder='e.g Whiskers'
+            placeholderTextColor={COLORS.grayscale700}
+            style={[styles.noteInput, {
+              backgroundColor: dark ? COLORS.dark2 : COLORS.tertiaryWhite,
+              color: dark ? COLORS.secondaryWhite : COLORS.black
+            }]}
+            value={petName}
+            onChangeText={(petName) => setPetName(petName)}
+          />
         <Button
-          title="Continue"
+          title="Adopt"
           style={styles.button}
           filled
-          onPress={() => { navigation.navigate("bookingdetails") }}
+          onPress={() => handleAdoption()}
         />
       </View>
     </SafeAreaView>
@@ -243,7 +136,7 @@ const styles = StyleSheet.create({
   },
   noteInput: {
     width: SIZES.width - 32,
-    height: 112,
+    height: 50,
     borderRadius: 16,
     backgroundColor: COLORS.tertiaryWhite,
     paddingHorizontal: 12,

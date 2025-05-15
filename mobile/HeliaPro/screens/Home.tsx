@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, FlatList, ListRenderItem, ImageSourcePropType } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native-virtualized-view';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
@@ -9,6 +9,8 @@ import { banners, categories, featuredHotels, recommendedHotels } from '../data'
 import SectionHeader from '../components/SectionHeader';
 import FeaturedHotelCard from '../components/FeaturedHotelCard';
 import VerticalHotelCard from '../components/VerticalHotelCard';
+import useCatStore from "@common/store/useCatStore";
+import { Breed, CatImage } from "@common/types/cat.types";
 
 interface HomeProps {
   navigation: {
@@ -16,34 +18,45 @@ interface HomeProps {
   };
 }
 
-interface BannerItem {
-  id: string;
-  discount: string;
-  discountName: string;
-  bottomTitle: string;
-  bottomSubtitle: string;
-}
-
 interface CategoryItem {
   id: string;
   name: string;
 }
 
-interface HotelItem {
-  id: string;
-  name: string;
-  image: any;
-  rating: number;
-  price: number;
-  location: string;
-  categoryId: string;
-}
 
 const Home: React.FC<HomeProps> = () => {
   const navigation = useNavigation<NavigationProp<any>>();
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(["1"]);
   const { dark, colors } = useTheme();
+  const fetchBreeds = useCatStore(state => state.fetchBreeds);
+  const breeds = useCatStore(state => state.breeds);
+  const loading = useCatStore(state => state.loading);
+
+  
+  const [search, setSearch] = useState('');
+  const [filtered, setFiltered] = useState<Breed[]>([]);
+
+  useEffect(() => {
+    fetchBreeds();
+  }, [fetchBreeds]);
+
+  useEffect(() => {
+    if (!search) {
+      setFiltered(breeds);
+    } else {
+      const term = search.toLowerCase();
+      setFiltered(
+        breeds.filter(b => 
+          b.name.toLowerCase().includes(term) ||
+          b.temperament.toLowerCase().includes(term) || 
+          b.origin?.toLowerCase().includes(term) ||
+          b.description?.toLowerCase().includes(term) ||
+          b["alt_names"]?.toLowerCase().includes(term)
+        )
+      );
+    }
+    console.log(breeds[0])
+  }, [search, breeds]);
 
   const renderHeader = () => (
     <View style={styles.headerContainer}>
@@ -116,85 +129,6 @@ const Home: React.FC<HomeProps> = () => {
     );
   }
 
-  const renderBannerItem: ListRenderItem<BannerItem> = ({ item }) => (
-    <View style={styles.bannerContainer}>
-      <View style={styles.bannerTopContainer}>
-        <View>
-          <Text style={styles.bannerDicount}>{item.discount} OFF</Text>
-          <Text style={styles.bannerDiscountName}>{item.discountName}</Text>
-        </View>
-        <Text style={styles.bannerDiscountNum}>{item.discount}</Text>
-      </View>
-      <View style={styles.bannerBottomContainer}>
-        <Text style={styles.bannerBottomTitle}>{item.bottomTitle}</Text>
-        <Text style={styles.bannerBottomSubtitle}>{item.bottomSubtitle}</Text>
-      </View>
-    </View>
-  );
-
-  const keyExtractor = (item: { id: string }) => item.id.toString();
-
-  const handleEndReached = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % banners.length);
-  };
-
-  const renderDot = (index: number) => (
-    <View
-      style={[styles.dot, index === currentIndex ? styles.activeDot : null]}
-      key={index}
-    />
-  );
-
-  const renderBanner = () => (
-    <View style={styles.bannerItemContainer}>
-      <FlatList
-        data={banners}
-        renderItem={renderBannerItem}
-        keyExtractor={keyExtractor}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onEndReached={handleEndReached}
-        onEndReachedThreshold={0.5}
-        onMomentumScrollEnd={(event) => {
-          const newIndex = Math.round(
-            event.nativeEvent.contentOffset.x / SIZES.width
-          );
-          setCurrentIndex(newIndex);
-        }}
-      />
-      <View style={styles.dotContainer}>
-        {banners.map((_, index) => renderDot(index))}
-      </View>
-    </View>
-  );
-
-  const renderFeaturedHotels = () => (
-    <View>
-      <SectionHeader
-        title="Featured"
-        subtitle="See All"
-        onPress={() => navigation.navigate("featuredhotels")}
-      />
-      <FlatList
-        data={featuredHotels}
-        keyExtractor={(item) => item.id}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <FeaturedHotelCard
-            image={item.image}
-            name={item.name}
-            rating={item.rating}
-            price={item.price}
-            location={item.location}
-            onPress={() => navigation.navigate("hoteldetails")}
-          />
-        )}
-      />
-    </View>
-  );
-
   const renderOurRecommendationHotels = () => {
     const filteredHotels = recommendedHotels.filter(hotel => selectedCategories.includes("1") || selectedCategories.includes(hotel.categoryId));
 
@@ -248,7 +182,7 @@ const Home: React.FC<HomeProps> = () => {
           marginVertical: 16
         }}>
           <FlatList
-            data={filteredHotels}
+            data={breeds}
             keyExtractor={item => item.id}
             numColumns={2}
             columnWrapperStyle={{ gap: 16 }}
@@ -256,10 +190,9 @@ const Home: React.FC<HomeProps> = () => {
               <VerticalHotelCard
                 name={item.name}
                 image={item.image}
-                rating={item.rating}
-                price={item.price}
-                location={item.location}
-                onPress={() => navigation.navigate("hoteldetails")}
+                price={item.origin}
+                location={item.temperament}
+                //onPress={() => navigation.navigate("hoteldetails")}
               />
             )}
           />
@@ -274,8 +207,6 @@ const Home: React.FC<HomeProps> = () => {
         {renderHeader()}
         <ScrollView showsVerticalScrollIndicator={false}>
           {renderSearchBar()}
-          {renderBanner()}
-          {renderFeaturedHotels()}
           {renderOurRecommendationHotels()}
         </ScrollView>
       </View>
